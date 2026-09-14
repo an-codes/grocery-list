@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>Fridge List 🛒</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream: #FFFBF3;
+    --cream-deep: #FFF3E4;
+    --pink: #FF9EC4;
+    --pink-soft: #FFD9EA;
+    --plum: #57344F;
+    --plum-soft: #8A6B85;
+    --mint: #A6E3C6;
+    --sky: #A9D6EE;
+    --coral: #FFB2A6;
+    --butter: #FFE29B;
+    --periwinkle: #BFC8F2;
+    --peach: #FFCBA0;
+    --lavender: #D9BFE9;
+    --line: rgba(87,52,79,0.10);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 8% 4%, var(--pink-soft) 0%, transparent 42%),
+      radial-gradient(circle at 96% 12%, var(--mint) 0%, transparent 38%),
+      var(--cream);
+    font-family:'Quicksand', sans-serif;
+    color:var(--plum);
+    min-height:100vh;
+    padding-bottom:64px;
+  }
+  .wrap{max-width:480px;margin:0 auto;padding:22px 16px 0;}
+
+  /* header */
+  .brand{display:flex;align-items:center;gap:10px;margin-bottom:4px;}
+  .brand-badge{
+    width:44px;height:44px;border-radius:14px;
+    background:linear-gradient(145deg, var(--pink) 0%, var(--coral) 100%);
+    display:flex;align-items:center;justify-content:center;
+    font-size:22px;
+    box-shadow:0 4px 0 rgba(87,52,79,0.12);
+    transform:rotate(-4deg);
+    flex-shrink:0;
+  }
+  h1{
+    font-family:'Fredoka',sans-serif;
+    font-size:26px;
+    margin:0;
+    font-weight:600;
+    letter-spacing:-0.2px;
+  }
+  .sub{
+    margin:2px 0 0 0;
+    font-size:13.5px;
+    color:var(--plum-soft);
+  }
+  .sync-pill{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:11.5px; color:var(--plum-soft);
+    margin-top:10px; padding:5px 10px 5px 8px;
+    background:#fff; border-radius:20px;
+    border:1px solid var(--line);
+  }
+  .dot{width:7px;height:7px;border-radius:50%;background:#c9c9c9;transition:background .2s;}
+  .dot.live{background:#6bd68c; box-shadow:0 0 0 3px rgba(107,214,140,0.25);}
+
+  /* add bar */
+  .add-card{
+    margin-top:18px;
+    background:#fff;
+    border-radius:20px;
+    padding:14px;
+    box-shadow:0 8px 22px rgba(87,52,79,0.08);
+    border:1px solid var(--line);
+  }
+  .add-row{display:flex; gap:8px;}
+  #itemInput{
+    flex:1;
+    border:2px solid var(--pink-soft);
+    background:var(--cream-deep);
+    border-radius:14px;
+    padding:12px 14px;
+    font-family:'Quicksand',sans-serif;
+    font-size:16px;
+    font-weight:600;
+    color:var(--plum);
+    outline:none;
+  }
+  #itemInput::placeholder{color:#c8a9be; font-weight:600;}
+  #itemInput:focus{border-color:var(--pink);}
+  #addBtn{
+    width:48px; border:none; border-radius:14px;
+    background:linear-gradient(145deg, var(--pink), var(--coral));
+    color:#fff; font-size:22px; cursor:pointer;
+    box-shadow:0 3px 0 #e57ea5;
+    transition:transform .08s;
+  }
+  #addBtn:active{transform:translateY(2px); box-shadow:0 1px 0 #e57ea5;}
+
+  .chip-row{
+    display:flex; gap:7px; margin-top:11px;
+    overflow-x:auto; padding-bottom:2px;
+    scrollbar-width:none;
+  }
+  .chip-row::-webkit-scrollbar{display:none;}
+  .chip{
+    flex-shrink:0;
+    font-family:'Quicksand',sans-serif;
+    font-weight:700; font-size:13px;
+    padding:7px 13px; border-radius:20px;
+    border:2px solid transparent;
+    cursor:pointer; white-space:nowrap;
+    color:var(--plum);
+    opacity:0.55;
+    transition:opacity .15s, transform .1s;
+  }
+  .chip.active{opacity:1; border-color:rgba(87,52,79,0.18); transform:scale(1.04);}
+  .chip:active{transform:scale(0.97);}
+
+  /* categories */
+  .cat-section{margin-top:22px;}
+  .cat-head{
+    display:flex; align-items:center; gap:8px;
+    margin-bottom:8px; padding-left:2px;
+  }
+  .cat-tape{
+    font-family:'Fredoka',sans-serif;
+    font-weight:600; font-size:14.5px;
+    padding:4px 12px 5px;
+    border-radius:7px;
+    transform:rotate(-1.2deg);
+    box-shadow:0 2px 0 rgba(87,52,79,0.08);
+  }
+  .cat-count{font-size:12.5px; color:var(--plum-soft); font-weight:700;}
+
+  .item-list{display:flex; flex-direction:column; gap:8px;}
+  .item{
+    display:flex; align-items:center; gap:11px;
+    background:#fff;
+    border-radius:16px;
+    padding:12px 13px;
+    border:1px solid var(--line);
+    box-shadow:0 3px 10px rgba(87,52,79,0.05);
+    animation:pop .18s ease;
+  }
+  @keyframes pop{from{opacity:0; transform:scale(0.95) translateY(3px);} to{opacity:1; transform:none;}}
+  .check{
+    width:26px;height:26px;border-radius:50%;
+    border:2.5px solid var(--pink);
+    flex-shrink:0; cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    font-size:14px; color:#fff;
+    transition:background .15s, border-color .15s;
+    background:#fff;
+  }
+  .check.done{background:var(--pink); border-color:var(--pink);}
+  .item-text{
+    flex:1; font-weight:700; font-size:15.5px;
+    word-break:break-word;
+  }
+  .item.done .item-text{
+    text-decoration:line-through;
+    color:#c9bcc7;
+  }
+  .del{
+    border:none;background:none; cursor:pointer;
+    color:#d8c3d3; font-size:17px; padding:4px;
+    flex-shrink:0;
+  }
+  .del:hover{color:var(--pink);}
+
+  .empty{
+    text-align:center; padding:40px 20px;
+    color:var(--plum-soft);
+  }
+  .empty-emoji{font-size:38px; margin-bottom:8px;}
+  .empty p{margin:2px 0; font-weight:600; font-size:14.5px;}
+
+  .footer-actions{
+    max-width:480px;margin:20px auto 0; padding:0 16px;
+    display:flex; justify-content:center;
+  }
+  #clearBtn{
+    border:none; background:none; color:var(--plum-soft);
+    font-family:'Quicksand',sans-serif; font-weight:700; font-size:13px;
+    text-decoration:underline; cursor:pointer; padding:8px;
+  }
+
+  .setup-banner{
+    max-width:480px;margin:16px auto 0;padding:12px 16px;
+    background:var(--butter); border-radius:14px;
+    font-size:13px; font-weight:700; color:#6b5510;
+    display:none;
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="brand">
+    <div class="brand-badge">🛒</div>
+    <div>
+      <h1>Fridge List</h1>
+      <p class="sub">tap the fridge sticker, add what's missing</p>
+    </div>
+  </div>
+  <div class="sync-pill"><span class="dot" id="syncDot"></span><span id="syncText">connecting…</span></div>
+
+  <div id="setupBanner" class="setup-banner">⚠️ Add your Firebase config near the bottom of the file to go live.</div>
+
+  <div class="add-card">
+    <div class="add-row">
+      <input id="itemInput" type="text" placeholder="oat milk, strawberries, eggs…" maxlength="60">
+      <button id="addBtn">+</button>
+    </div>
+    <div class="chip-row" id="chipRow"></div>
+  </div>
+
+  <div id="listArea"></div>
+
+  <div class="footer-actions">
+    <button id="clearBtn">clear checked items</button>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-database-compat.js"></script>
+<script>
+/* ---------- CATEGORY DEFINITIONS ---------- */
+const CATEGORIES = [
+  { id: 'aldi',  label: 'Aldi 🛒',  color: '#A6E3C6' },
+  { id: 'tesco', label: 'Tesco 🔵', color: '#A9D6EE' },
+  { id: 'asda',  label: 'Asda 💚',  color: '#FFE29B' },
+  { id: 'any',   label: 'Any ✨',   color: '#D9BFE9' },
+];
+let selectedCategory = 'aldi';
+
+/* ---------- FIREBASE CONFIG ---------- */
+/* Paste your project's config below — see setup notes at the end of this file. */
+const firebaseConfig = {
+  apiKey: "AIzaSyDs_v9AiVzlsMIrzfEh0_qq8bGKkeD9L8Y",
+  authDomain: "grocery-list-7cda8.firebaseapp.com",
+  databaseURL: "https://grocery-list-7cda8-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "grocery-list-7cda8",
+  storageBucket: "grocery-list-7cda8.firebasestorage.app",
+  messagingSenderId: "294262209855",
+  appId: "1:294262209855:web:3c3da31c83b2941122278a"
+};
+
+let db = null;
+let itemsRef = null;
+const isConfigured = !Object.values(firebaseConfig).some(v => String(v).startsWith('YOUR_'));
+
+if (isConfigured) {
+  firebase.initializeApp(firebaseConfig);
+  db = firebase.database();
+  itemsRef = db.ref('groceryList/items');
+} else {
+  document.getElementById('setupBanner').style.display = 'block';
+  document.getElementById('syncText').textContent = 'not connected yet';
+}
+
+/* ---------- STATE ---------- */
+let items = {}; // id -> {text, category, done, addedAt}
+let localOnlyMode = !isConfigured;
+
+/* Fallback in-memory store if Firebase isn't configured yet, so the UI still works for previewing */
+function localSave(){ /* no persistence without Firebase */ }
+
+/* ---------- RENDER ---------- */
+function renderChips(){
+  const row = document.getElementById('chipRow');
+  row.innerHTML = '';
+  CATEGORIES.forEach(cat => {
+    const chip = document.createElement('div');
+    chip.className = 'chip' + (cat.id === selectedCategory ? ' active' : '');
+    chip.style.background = cat.color;
+    chip.textContent = cat.label;
+    chip.onclick = () => { selectedCategory = cat.id; renderChips(); };
+    row.appendChild(chip);
+  });
+}
+
+function renderList(){
+  const area = document.getElementById('listArea');
+  const ids = Object.keys(items);
+
+  if (ids.length === 0){
+    area.innerHTML = `
+      <div class="empty">
+        <div class="empty-emoji">🍋</div>
+        <p>the list is empty!</p>
+        <p>add something yummy above.</p>
+      </div>`;
+    return;
+  }
+
+  let html = '';
+  CATEGORIES.forEach(cat => {
+    const catItems = ids
+      .filter(id => (items[id].category || 'any') === cat.id)
+      .sort((a,b) => (items[a].done - items[b].done) || (items[a].addedAt - items[b].addedAt));
+
+    if (catItems.length === 0) return;
+
+    html += `<div class="cat-section">
+      <div class="cat-head">
+        <span class="cat-tape" style="background:${cat.color}">${cat.label}</span>
+        <span class="cat-count">${catItems.filter(id=>!items[id].done).length} to get</span>
+      </div>
+      <div class="item-list">`;
+
+    catItems.forEach(id => {
+      const it = items[id];
+      html += `
+        <div class="item ${it.done ? 'done' : ''}">
+          <div class="check ${it.done ? 'done' : ''}" onclick="toggleDone('${id}')">${it.done ? '✓' : ''}</div>
+          <div class="item-text">${escapeHtml(it.text)}</div>
+          <button class="del" onclick="deleteItem('${id}')">✕</button>
+        </div>`;
+    });
+
+    html += `</div></div>`;
+  });
+
+  area.innerHTML = html || `
+      <div class="empty">
+        <div class="empty-emoji">🍋</div>
+        <p>the list is empty!</p>
+        <p>add something yummy above.</p>
+      </div>`;
+}
+
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+/* ---------- ACTIONS ---------- */
+function addItem(){
+  const input = document.getElementById('itemInput');
+  const text = input.value.trim();
+  if (!text) return;
+
+  const id = 'i' + Date.now() + Math.random().toString(36).slice(2,7);
+  const newItem = { text, category: selectedCategory, done: false, addedAt: Date.now() };
+
+  if (itemsRef){
+    itemsRef.child(id).set(newItem);
+  } else {
+    items[id] = newItem;
+    renderList();
+  }
+  input.value = '';
+  input.focus();
+}
+
+function toggleDone(id){
+  if (!items[id]) return;
+  const newDone = !items[id].done;
+  if (itemsRef){
+    itemsRef.child(id).child('done').set(newDone);
+  } else {
+    items[id].done = newDone;
+    renderList();
+  }
+}
+
+function deleteItem(id){
+  if (itemsRef){
+    itemsRef.child(id).remove();
+  } else {
+    delete items[id];
+    renderList();
+  }
+}
+
+function clearChecked(){
+  const doneIds = Object.keys(items).filter(id => items[id].done);
+  if (itemsRef){
+    const updates = {};
+    doneIds.forEach(id => updates[id] = null);
+    itemsRef.update(updates);
+  } else {
+    doneIds.forEach(id => delete items[id]);
+    renderList();
+  }
+}
+
+/* ---------- WIRE UP ---------- */
+document.getElementById('addBtn').onclick = addItem;
+document.getElementById('itemInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') addItem();
+});
+document.getElementById('clearBtn').onclick = clearChecked;
+
+renderChips();
+renderList();
+
+/* ---------- LIVE SYNC ---------- */
+if (itemsRef){
+  itemsRef.on('value', snapshot => {
+    items = snapshot.val() || {};
+    renderList();
+    document.getElementById('syncDot').classList.add('live');
+    document.getElementById('syncText').textContent = 'synced live';
+  }, err => {
+    document.getElementById('syncDot').classList.remove('live');
+    document.getElementById('syncText').textContent = 'connection error';
+    console.error(err);
+  });
+}
+</script>
+
+</body>
+</html>
